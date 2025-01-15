@@ -1,0 +1,65 @@
+---
+title: "Correlation Analysis: Income and Broadband Access"
+author: "Edward Xu"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Introduction
+This analysis examines the correlation between changes in median income and broadband access from 2017 to 2018.
+
+## Load Required Libraries
+```{r libraries}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+## Import Data
+```{r import}
+# Read Excel data
+income_data <- read_excel("C:/Users/tomat/Documents/income 2017-2018.xlsx")
+broadband_data <- read_excel("C:/Users/tomat/Documents/leading zeros broadband.xlsx")
+
+# Join datasets
+combined_data <- income_data %>%
+  left_join(broadband_data, by = "cfips")
+```
+
+## Correlation Analysis
+```{r correlation}
+# Calculate correlation
+correlation_test_2018 <- cor.test(as.numeric(combined_data$`Median Household Income 2018`),
+                                combined_data$broadband2018,
+                                use = "complete.obs",
+                                method = "pearson")
+
+correlation_test_changes <- cor.test(combined_data$`Percent Change 2017-2018`,
+                                   combined_data$change,
+                                   use = "complete.obs",
+                                   method = "pearson")
+
+cor.test(as.numeric(combined_data$`Median Household Income 2018`),
+         combined_data$broadband2018,
+         use = "complete.obs")
+```
+
+## Results
+```{r results}
+# Correlation between median income and broadband access.
+cat(sprintf("2018 Income and Broadband: r = %.3f (p < %.3e)\n", 
+           correlation_test_2018$estimate, correlation_test_2018$p.value))
+
+# Correlation between changes in median income and broadband access between 2017 and 2018.
+cat(sprintf("2017-2018 Changes: r = %.3f (p = %.3f)\n", 
+           correlation_test_changes$estimate, correlation_test_changes$p.value))
+```
+
+## Summary
+The analysis shows a strong positive correlation between median income and broadband access in 2018 (r = 0.742, p < 0.001). However, when examining year-over-year changes from 2017 to 2018, there is virtually no correlation between changes in median income and broadband access (r = 0.003, p = 0.919). This suggests that while higher-income counties tend to have better broadband access, short-term changes in income are not associated with changes in broadband access.
